@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:tcp="http://www.mulesoft.org/schema/mule/tcp" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/tcp http://www.mulesoft.org/schema/mule/tcp/current/mule-tcp.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<tcp:connector name="TCP" validateConnections="true"
+		sendBufferSize="0" receiveBufferSize="0" receiveBacklog="0"
+		clientSoTimeout="10000" serverSoTimeout="10000" socketSoLinger="0"
+		doc:name="TCP" />
+	<tcp:connector name="TCP1" validateConnections="true"
+		sendBufferSize="0" receiveBufferSize="0" receiveBacklog="0"
+		clientSoTimeout="10000" serverSoTimeout="10000" socketSoLinger="0"
+		doc:name="TCP" />
+	<http:listener-config name="HTTP_Listener_Configuration"
+		host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration" />
+	<tcp:endpoint exchange-pattern="request-response" host="localhost"
+		port="2376" name="TCP2" responseTimeout="10000" doc:name="TCP" />
+	<flow name="docker-ramlFlow1">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="/docker" allowedMethods="GET" doc:name="HTTP" />
+		<flow-ref name="docker-ramlFlow" doc:name="docker-ramlFlow" />
+	</flow>
+	<flow name="docker-ramlFlow">
+		<tcp:inbound-endpoint exchange-pattern="request-response"
+			connector-ref="TCP1" responseTimeout="10000" doc:name="TCP" host="127.0.0.1"
+			port="2376" />
+		<logger message="#[payload]" level="INFO" doc:name="Logger" />
+	</flow>
+</mule>
